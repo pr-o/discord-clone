@@ -9,6 +9,8 @@ import "@uploadthing/react/styles.css"
 
 import { useState } from "react"
 
+import { useToast } from "@/components/ui/use-toast"
+
 interface FileUploadProps {
   endPoint: "messageFile" | "serverImage"
   value: string
@@ -18,8 +20,7 @@ interface FileUploadProps {
 const FileUpload = ({ endPoint, value, onChange }: FileUploadProps) => {
   const [imageLoaded, setImageLoaded] = useState(false)
   const fileType = value?.split(".").pop()
-
-  console.log("value =>", value, " - ", endPoint, onChange)
+  const { toast } = useToast()
 
   if (value && fileType !== "pdf") {
     return (
@@ -55,7 +56,11 @@ const FileUpload = ({ endPoint, value, onChange }: FileUploadProps) => {
         onChange(res?.[0].url)
       }}
       onUploadError={(error: Error) => {
-        console.log(error)
+        toast({
+          title: "Something went wrong! Try again later",
+          description: error.message,
+          variant: "destructive",
+        })
       }}
     />
   )
