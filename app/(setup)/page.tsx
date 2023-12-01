@@ -25,8 +25,3 @@ const SetupPage = async () => {
 }
 
 export default SetupPage
-
-{
-  /* <UserButton afterSignOutUrl="/" />
-<ThemeToggle /> */
-}

@@ -1,12 +1,13 @@
-import "./globals.css"
+import "@/app/globals.css"
 
 import type { Metadata } from "next"
 import { Open_Sans } from "next/font/google"
+import { QueryProvider } from "@/providers/query-provider"
+import { ThemeProvider } from "@/providers/theme-provider"
 import { ClerkProvider } from "@clerk/nextjs"
 
 import { cn } from "@/lib/utils"
-import QueryProvider from "@/components/providers/queryProvider"
-import { ThemeProvider } from "@/components/providers/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
 
 const font = Open_Sans({ subsets: ["latin"] })
 
@@ -32,6 +33,7 @@ export default function RootLayout({
               storageKey="discord-clone-by-sung-theme"
             >
               {children}
+              <Toaster />
             </ThemeProvider>
           </QueryProvider>
         </body>
