@@ -1,10 +1,23 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import axios from "axios"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
+import { useCreateServer } from "@/hooks/use-create-server"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Form,
   FormControl,
@@ -14,16 +27,8 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-
-import { Button } from "../ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog"
+import { useToast } from "@/components/ui/use-toast"
+import FileUpload from "@/components/file-upload"
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -35,6 +40,9 @@ const formSchema = z.object({
 })
 
 export const InitialModal = () => {
+  const { toast } = useToast()
+  const router = useRouter()
+
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -49,11 +57,32 @@ export const InitialModal = () => {
     resolver: zodResolver(formSchema),
   })
 
-  const isLoading = form.formState.isSubmitting
+  const isSubmitting = form.formState.isSubmitting
+
+  const { mutate: createServer } = useCreateServer({
+    onSuccess: () => {
+      toast({
+        title: "Server created",
+        description: "Friday, February 10, 2023 at 5:57 PM",
+      })
+      form.reset()
+      // TODO: @sung
+      // insert query key later
+      // queryClient.invalidateQueries([ // key //])
+      router.refresh()
+      window.location.reload()
+    },
+    onError: () => {
+      toast({
+        title: "Something went wrong",
+        description: "Try again later",
+        variant: "destructive",
+      })
+    },
+  })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // TODO: @sung
-    console.log(values) // log it for now
+    createServer({ values })
   }
 
   // avoid the inherent hydration error of modals
@@ -74,9 +103,22 @@ export const InitialModal = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-8 px-6">
-              <div className="flex items-center justify-center border-2 text-center">
-                {/* TODO: @sung */}
-                Image Upload
+              <div className="flex items-center justify-center text-center">
+                <FormField
+                  control={form.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <FileUpload
+                          endPoint="serverImage"
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <FormField
@@ -89,7 +131,7 @@ export const InitialModal = () => {
                     </FormLabel>
                     <FormControl>
                       <Input
-                        disabled={isLoading}
+                        disabled={isSubmitting}
                         className="border-0 bg-zinc-300/50 text-black focus-visible:ring-0 focus-visible:ring-offset-0"
                         placeholder="Enter server name"
                         {...field}
@@ -101,7 +143,7 @@ export const InitialModal = () => {
               />
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-4">
-              <Button variant="primary" disabled={isLoading}>
+              <Button variant="primary" disabled={isSubmitting}>
                 Create
               </Button>
             </DialogFooter>
