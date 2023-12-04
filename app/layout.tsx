@@ -9,6 +9,8 @@ import { ClerkProvider } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
 
+import { ModalProvider } from "./providers/modal-provider"
+
 const font = Open_Sans({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
@@ -33,6 +35,7 @@ export default function RootLayout({
               storageKey="discord-clone-by-sung-theme"
             >
               {children}
+              <ModalProvider />
               <Toaster />
             </ThemeProvider>
           </QueryProvider>
