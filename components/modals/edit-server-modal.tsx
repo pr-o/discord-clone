@@ -1,14 +1,13 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
-import { useCreateServer } from "@/hooks/use-create-server"
+import { useModal } from "@/hooks/use-modal-store"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -27,79 +26,64 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useToast } from "@/components/ui/use-toast"
 import FileUpload from "@/components/file-upload"
 
 const formSchema = z.object({
   name: z.string().min(1, {
-    message: "Server name is required",
+    message: "Server name is required.",
   }),
   imageUrl: z.string().min(1, {
-    message: "Sever image is required",
+    message: "Server image is required.",
   }),
 })
 
-export const InitialModal = () => {
-  const { toast } = useToast()
+export const EditServerModal = () => {
+  const { isOpen, onClose, type, data } = useModal()
   const router = useRouter()
 
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
+  const isModalOpen = isOpen && type === "edit-server"
+  const { server } = data
 
   const form = useForm({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       imageUrl: "",
     },
-    resolver: zodResolver(formSchema),
   })
 
-  const isSubmitting = form.formState.isSubmitting
+  useEffect(() => {
+    if (server) {
+      form.setValue("name", server.name)
+      form.setValue("imageUrl", server.imageUrl)
+    }
+  }, [server, form])
 
-  const { mutate: createServer } = useCreateServer()
+  const isLoading = form.formState.isSubmitting
 
-  const onSubmit = useCallback(
-    async (values: z.infer<typeof formSchema>) => {
-      createServer(
-        { values },
-        {
-          onSuccess: () => {
-            toast({
-              title: "Server created",
-              description: "Friday, February 10, 2023 at 5:57 PM",
-            })
-            form.reset()
-            // TODO: @sung
-            // insert query key later
-            // queryClient.invalidateQueries([ // key //])
-            router.refresh()
-            window.location.reload()
-          },
-          onError: () => {
-            toast({
-              title: "Something went wrong",
-              description: "Try again later",
-              variant: "destructive",
-            })
-          },
-        }
-      )
-    },
-    [createServer]
-  )
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      await axios.patch(`/api/servers/${server?.id}`, values)
 
-  // avoid the inherent hydration error of modals
-  if (!isMounted) return null
+      form.reset()
+      router.refresh()
+      onClose()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const handleClose = () => {
+    form.reset()
+    onClose()
+  }
 
   return (
-    <Dialog open>
+    <Dialog open={isModalOpen} onOpenChange={handleClose}>
       <DialogContent className="overflow-hidden bg-white p-0 text-black">
         <DialogHeader className="px-6 pt-8">
           <DialogTitle className="text-center text-2xl font-bold">
-            Customize your sever
+            Customize your server
           </DialogTitle>
           <DialogDescription className="text-center text-zinc-500">
             Give your server a personality with a name and an image. You can
@@ -122,7 +106,6 @@ export const InitialModal = () => {
                           onChange={field.onChange}
                         />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -134,11 +117,11 @@ export const InitialModal = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs font-bold uppercase text-zinc-500 dark:text-secondary/70">
-                      Sever name
+                      Server name
                     </FormLabel>
                     <FormControl>
                       <Input
-                        disabled={isSubmitting}
+                        disabled={isLoading}
                         className="border-0 bg-zinc-300/50 text-black focus-visible:ring-0 focus-visible:ring-offset-0"
                         placeholder="Enter server name"
                         {...field}
@@ -150,11 +133,8 @@ export const InitialModal = () => {
               />
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-4">
-              <Button
-                variant="primary"
-                disabled={!form.getValues("imageUrl") || isSubmitting}
-              >
-                Create
+              <Button variant="primary" disabled={isLoading}>
+                Save
               </Button>
             </DialogFooter>
           </form>
