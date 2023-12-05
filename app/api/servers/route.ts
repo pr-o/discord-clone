@@ -5,6 +5,30 @@ import { v4 as uuidv4 } from "uuid"
 import { currentProfile } from "@/lib/current-profile"
 import { db } from "@/lib/db"
 
+export async function GET(req: Request) {
+  try {
+    const profile = await currentProfile()
+
+    if (!profile) {
+      return new NextResponse("Unauthorized", { status: 401 })
+    }
+
+    const servers = await db.server.findMany({
+      where: {
+        members: {
+          some: {
+            profileId: profile.id,
+          },
+        },
+      },
+    })
+    return NextResponse.json(servers)
+  } catch (error) {
+    console.log("[GET_SERVER]", error)
+    return new NextResponse("Internal Error", { status: 500 })
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const { name, imageUrl } = await req.json()

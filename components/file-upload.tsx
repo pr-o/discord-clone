@@ -27,6 +27,7 @@ const FileUpload = ({ endPoint, value, onChange }: FileUploadProps) => {
       <div className="relative h-20 w-20">
         <Image
           fill
+          sizes="80px"
           src={value}
           onLoad={() => setImageLoaded(true)}
           alt="Image to upload"

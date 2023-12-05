@@ -1,3 +1,5 @@
+"use client"
+
 import { channel } from "diagnostics_channel"
 import { redirect } from "next/navigation"
 import { ServerWithMembersWithProfiles } from "@/types"
@@ -13,8 +15,7 @@ import {
   Users,
 } from "lucide-react"
 
-import { currentProfile } from "@/lib/current-profile"
-import { db } from "@/lib/db"
+import { useModal } from "@/hooks/use-modal-store"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,15 +29,11 @@ interface ServerHeaderProps {
   role?: MemberRole
 }
 
-export const ServerHeader = async ({ server, role }: ServerHeaderProps) => {
+export const ServerHeader = ({ server, role }: ServerHeaderProps) => {
+  const { onOpen } = useModal()
   const isAdmin = role === MemberRole.ADMIN
   const isModerator = role === MemberRole.MODERATOR
   const isAdminOrModerator = isAdmin || isModerator
-
-  const profile = await currentProfile()
-  if (!profile) {
-    return redirectToSignIn()
-  }
 
   return (
     <DropdownMenu>
@@ -48,38 +45,56 @@ export const ServerHeader = async ({ server, role }: ServerHeaderProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 space-y-[2px] text-xs font-medium text-black dark:text-neutral-400">
         {isAdminOrModerator && (
-          <DropdownMenuItem className="cursor-pointer px-3 py-2 text-sm text-indigo-600 dark:text-indigo-400">
+          <DropdownMenuItem
+            onClick={() => onOpen("invite", { server })}
+            className="cursor-pointer px-3 py-2 text-sm text-indigo-600 dark:text-indigo-400"
+          >
             Invite People
             <UserPlus className="ml-auto h-4 w-4" />
           </DropdownMenuItem>
         )}
         {isAdmin && (
-          <DropdownMenuItem className="cursor-pointer px-3 py-2 text-sm">
+          <DropdownMenuItem
+            onClick={() => onOpen("members", { server })}
+            className="cursor-pointer px-3 py-2 text-sm"
+          >
             Manage Members
             <Users className="ml-auto h-4 w-4" />
           </DropdownMenuItem>
         )}
         {isAdminOrModerator && (
-          <DropdownMenuItem className="cursor-pointer px-3 py-2 text-sm">
+          <DropdownMenuItem
+            onClick={() => onOpen("create-channel", { server })}
+            className="cursor-pointer px-3 py-2 text-sm"
+          >
             Create Channel
             <PlusCircle className="ml-auto h-4 w-4" />
           </DropdownMenuItem>
         )}
         {isAdmin && (
-          <DropdownMenuItem className="cursor-pointer px-3 py-2 text-sm">
+          <DropdownMenuItem
+            onClick={() => onOpen("edit-server", { server })}
+            className="cursor-pointer px-3 py-2 text-sm"
+          >
             Server Settings
             <Settings className="ml-auto h-4 w-4" />
           </DropdownMenuItem>
         )}
         {isAdminOrModerator && <DropdownMenuSeparator />}
         {!isAdmin && (
-          <DropdownMenuItem className="cursor-pointer px-3 py-2 text-sm text-rose-500">
+          <DropdownMenuItem
+            onClick={() => onOpen("leave-server", { server })}
+            className="cursor-pointer px-3 py-2 text-sm text-rose-500"
+          >
             Leave Server
             <LogOut className="ml-auto h-4 w-4" />
           </DropdownMenuItem>
         )}
         {isAdmin && (
-          <DropdownMenuItem className="cursor-pointer px-3 py-2 text-sm text-rose-500">
+          <DropdownMenuItem
+            onClick={() => onOpen("delete-server", { server })}
+            className="cursor-pointer px-3 py-2 text-sm text-rose-500"
+          >
             Delete Server
             <Trash className="ml-auto h-4 w-4" />
           </DropdownMenuItem>

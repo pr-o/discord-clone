@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -40,10 +40,9 @@ const formSchema = z.object({
 
 export const CreateServerModal = () => {
   const { isOpen, onClose, type } = useModal()
-
-  const isModalOpen = isOpen && type === "create-server"
   const { toast } = useToast()
   const router = useRouter()
+  const isModalOpen = isOpen && type === "create-server"
 
   const form = useForm({
     defaultValues: {
@@ -55,30 +54,36 @@ export const CreateServerModal = () => {
 
   const isSubmitting = form.formState.isSubmitting
 
-  const { mutate: createServer } = useCreateServer({
-    onSuccess: () => {
-      toast({
-        title: "Server created",
-        description: "Friday, February 10, 2023 at 5:57 PM",
-      })
-      form.reset()
-      // TODO: @sung
-      // insert query key later
-      // queryClient.invalidateQueries([ // key //])
-      router.refresh()
-    },
-    onError: () => {
-      toast({
-        title: "Something went wrong",
-        description: "Try again later",
-        variant: "destructive",
-      })
-    },
-  })
+  const { mutate: createServer } = useCreateServer()
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    createServer({ values })
-    onClose()
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    createServer(
+      { values },
+      {
+        onSuccess: (serverData) => {
+          toast({
+            title: "Server created",
+            description: "Friday, February 10, 2023 at 5:57 PM",
+          })
+          form.reset()
+          // TODO: @sung
+          // insert query key later
+          // queryClient.invalidateQueries([ // key //])
+
+          onClose()
+          const data = serverData?.data
+          console.log("serverData =>", serverData)
+          router.push(`/servers/${data?.id}`)
+        },
+        onError: () => {
+          toast({
+            title: "Something went wrong",
+            description: "Try again later",
+            variant: "destructive",
+          })
+        },
+      }
+    )
   }
 
   const handleClose = () => {
@@ -114,6 +119,7 @@ export const CreateServerModal = () => {
                           onChange={field.onChange}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
