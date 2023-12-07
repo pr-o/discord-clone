@@ -12,7 +12,18 @@ const nextConfig = {
     return config
   },
   images: {
-    domains: ["utfs.io", "uploadthing.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "utfs.io",
+        port: "",
+      },
+      {
+        protocol: "https",
+        hostname: "uploadthing.com",
+        port: "",
+      },
+    ],
   },
 }
 
