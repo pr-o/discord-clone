@@ -1,6 +1,6 @@
 
 ## URL
-https://discord-clone-git-develop-pr-o.vercel.app/
+[https://discord-clone-git-develop-pr-o.vercel.app/](https://discord-clone-git-develop-pr-o.vercel.app/)
 > Note that you will have to sign up using OAuth to look around
 
 # Screenshot
