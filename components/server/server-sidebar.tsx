@@ -1,7 +1,6 @@
-import { channel } from "diagnostics_channel"
 import { redirect } from "next/navigation"
 import { redirectToSignIn } from "@clerk/nextjs"
-import { ChannelType, MemberRole } from "@prisma/client"
+import { Channel, ChannelType, MemberRole } from "@prisma/client"
 import { Hash, Mic, ShieldAlert, ShieldCheck, Video } from "lucide-react"
 
 import { currentProfile } from "@/lib/current-profile"
@@ -63,7 +62,7 @@ export const ServerSidebar = async ({ serverId }: ServerSidebarProps) => {
     return redirect("/")
   }
 
-  const textChannels = server?.channels.filter(
+  const textChannels: Channel[] = server?.channels.filter(
     ({ type }) => type === ChannelType.TEXT
   )
   const audioChannels = server?.channels.filter(
@@ -90,37 +89,37 @@ export const ServerSidebar = async ({ serverId }: ServerSidebarProps) => {
               {
                 label: "Text Channels",
                 type: "channel",
-                data: textChannels?.map((channel) => ({
-                  id: channel.id,
-                  name: channel.name,
-                  icon: iconMap[channel.type],
+                data: textChannels?.map(({ id, name, type }) => ({
+                  id: id,
+                  name: name,
+                  icon: iconMap[type],
                 })),
               },
               {
                 label: "Voice Channels",
                 type: "channel",
-                data: audioChannels?.map((channel) => ({
-                  id: channel.id,
-                  name: channel.name,
-                  icon: iconMap[channel.type],
+                data: audioChannels?.map(({ id, name, type }) => ({
+                  id: id,
+                  name: name,
+                  icon: iconMap[type],
                 })),
               },
               {
                 label: "Video Channels",
                 type: "channel",
-                data: videoChannels?.map((channel) => ({
-                  id: channel.id,
-                  name: channel.name,
-                  icon: iconMap[channel.type],
+                data: videoChannels?.map(({ id, name, type }) => ({
+                  id: id,
+                  name: name,
+                  icon: iconMap[type],
                 })),
               },
               {
                 label: "Members",
                 type: "member",
-                data: members?.map((member) => ({
-                  id: member.id,
-                  name: member.profile.name,
-                  icon: roleIconMap[member.role],
+                data: members?.map(({ id, profile, role }) => ({
+                  id: id,
+                  name: profile.name,
+                  icon: roleIconMap[role],
                 })),
               },
             ]}
