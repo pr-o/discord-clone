@@ -1,70 +1,68 @@
 "use client"
 
 import Image from "next/image"
-import { X } from "lucide-react"
+import { FileIcon, X } from "lucide-react"
 
 import { UploadDropzone } from "@/lib/uploadthing"
 
 import "@uploadthing/react/styles.css"
 
-import { useState } from "react"
-
-import { useToast } from "@/components/ui/use-toast"
-
 interface FileUploadProps {
-  endPoint: "messageFile" | "serverImage"
-  value: string
   onChange: (url?: string) => void
+  value: string
+  endpoint: "messageFile" | "serverImage"
 }
 
-const FileUpload = ({ endPoint, value, onChange }: FileUploadProps) => {
-  const [imageLoaded, setImageLoaded] = useState(false)
+export const FileUpload = ({ onChange, value, endpoint }: FileUploadProps) => {
   const fileType = value?.split(".").pop()
-  const { toast } = useToast()
 
   if (value && fileType !== "pdf") {
     return (
       <div className="relative h-20 w-20">
-        <Image
-          fill
-          sizes="80px"
-          src={value}
-          onLoad={() => setImageLoaded(true)}
-          alt="Image to upload"
-          className="rounded-full"
-        />
-        {imageLoaded ? (
-          <button
-            disabled={!value}
-            type="button"
-            className="absolute right-0 top-0 -mr-2 rounded-full bg-rose-500 p-1 text-white shadow-sm"
-            onClick={() => {
-              onChange("")
-              setImageLoaded(false)
-            }}
-          >
-            <X className="h-4 w-4" />
-          </button>
-        ) : null}
+        <Image fill src={value} alt="Upload" className="rounded-full" />
+        <button
+          onClick={() => onChange("")}
+          className="absolute right-0 top-0 rounded-full bg-rose-500 p-1 text-white shadow-sm"
+          type="button"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+    )
+  }
+
+  if (value && fileType === "pdf") {
+    return (
+      <div className="relative mt-2 flex items-center rounded-md bg-background/10 p-2">
+        <FileIcon className="h-10 w-10 fill-indigo-200 stroke-indigo-400" />
+        <a
+          href={value}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-2 text-sm text-indigo-500 hover:underline dark:text-indigo-400"
+        >
+          {value}
+        </a>
+        <button
+          onClick={() => onChange("")}
+          className="absolute -right-2 -top-2 rounded-full bg-rose-500 p-1 text-white shadow-sm"
+          type="button"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
     )
   }
 
   return (
     <UploadDropzone
-      endpoint={endPoint}
+      endpoint={endpoint}
       onClientUploadComplete={(res) => {
         onChange(res?.[0].url)
       }}
       onUploadError={(error: Error) => {
-        toast({
-          title: "Something went wrong! Try again later",
-          description: error.message,
-          variant: "destructive",
-        })
+        console.log(error)
       }}
     />
   )
 }
-
-export default FileUpload

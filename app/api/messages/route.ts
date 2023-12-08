@@ -24,45 +24,45 @@ export async function GET(req: Request) {
 
     let messages: Message[] = []
 
-    // if (cursor) {
-    messages = await db.message.findMany({
-      take: MESSAGES_BATCH,
-      skip: 1,
-      cursor: {
-        id: cursor ? cursor : "0",
-      },
-      where: {
-        channelId,
-      },
-      include: {
-        member: {
-          include: {
-            profile: true,
+    if (cursor) {
+      messages = await db.message.findMany({
+        take: MESSAGES_BATCH,
+        skip: 1,
+        cursor: {
+          id: cursor ? cursor : "0",
+        },
+        where: {
+          channelId,
+        },
+        include: {
+          member: {
+            include: {
+              profile: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    })
-    // } else {
-    //   messages = await db.message.findMany({
-    //     take: MESSAGES_BATCH,
-    //     where: {
-    //       channelId,
-    //     },
-    //     include: {
-    //       member: {
-    //         include: {
-    //           profile: true,
-    //         },
-    //       },
-    //     },
-    //     orderBy: {
-    //       createdAt: "desc",
-    //     },
-    //   })
-    // }
+        orderBy: {
+          createdAt: "desc",
+        },
+      })
+    } else {
+      messages = await db.message.findMany({
+        take: MESSAGES_BATCH,
+        where: {
+          channelId,
+        },
+        include: {
+          member: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      })
+    }
 
     let nextCursor = null
 
