@@ -57,6 +57,7 @@ export const ChatMessages = ({
       paramKey,
       paramValue,
     })
+
   useChatSocket({ queryKey, addKey, updateKey })
   useChatScroll({
     chatRef,
@@ -66,7 +67,7 @@ export const ChatMessages = ({
     count: data?.pages?.[0]?.items?.length ?? 0,
   })
 
-  if (status === "pending") {
+  if (status === "loading") {
     return (
       <div className="flex flex-1 flex-col items-center justify-center">
         <Loader2 className="my-4 h-7 w-7 animate-spin text-zinc-500" />
@@ -109,7 +110,7 @@ export const ChatMessages = ({
       <div className="mt-auto flex flex-col-reverse">
         {data?.pages?.map((group, i) => (
           <Fragment key={i}>
-            {group.items.map((message: MessageWithMemberWithProfile) => (
+            {group?.items?.map((message: MessageWithMemberWithProfile) => (
               <ChatItem
                 key={message.id}
                 id={message.id}
