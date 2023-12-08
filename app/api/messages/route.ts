@@ -29,7 +29,7 @@ export async function GET(req: Request) {
         take: MESSAGES_BATCH,
         skip: 1,
         cursor: {
-          id: cursor,
+          id: cursor ? cursor : "0",
         },
         where: {
           channelId,
