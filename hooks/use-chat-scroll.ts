@@ -27,7 +27,6 @@ export const useChatScroll = ({
         loadMore()
       }
     }
-
     topDiv?.addEventListener("scroll", handleScroll)
 
     return () => {
@@ -49,10 +48,9 @@ export const useChatScroll = ({
       }
 
       const distanceFromBottom =
-        topDiv.scrollHeight - topDiv.scrollTop - topDiv.clientHeight
-      return distanceFromBottom <= 100
+        topDiv.scrollHeight - topDiv.clientHeight - topDiv.scrollTop
+      return distanceFromBottom > 50
     }
-
     if (shouldAutoScroll()) {
       setTimeout(() => {
         bottomRef.current?.scrollIntoView({
